@@ -35,7 +35,7 @@ class SidebarBackground(Static):
         self.update(INFO_SIDEBAR)
 
 class RunningAnimation(Static):
-    """机器人跳舞 ASCII 动态加载动画"""
+    """ASCII 动态加载动画"""
     def on_mount(self) -> None:
         self.frames = MOVIE_3
         self.current_frame = 0
