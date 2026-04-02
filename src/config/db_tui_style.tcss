@@ -1,0 +1,77 @@
+/* 1. 定义层级：后面的层会盖在前面的层上面 */
+Screen { 
+    layers: base overlay; 
+    background: $boost; 
+}
+
+/* 顶部数码管时钟容器 */
+#clock-container {
+    layer: base;
+    column-span: 2;
+    background: $surface;
+    border-bottom: tall $primary;
+    content-align: center middle;
+}
+
+#clock-digits {
+    color: $accent;
+    text-style: bold;
+}
+
+/* 主网格布局 */
+#main-grid {
+    layer: base;
+    layout: grid;
+    grid-size: 2 3;
+    grid-columns: 1fr 4fr;
+    grid-rows: 15% 10% 75%;
+}
+
+/* 侧边栏样式 */
+.stat-sidebar {
+    row-span: 2;
+    background: $surface;
+    border: tall $primary; 
+    border-left: none; border-top: none; border-bottom: none;
+    padding: 1;
+}
+
+/* 图表容器 */
+.charts-container {
+    layout: grid;
+    grid-size: 2 2;
+    grid-gutter: 1;
+    padding: 1;
+}
+
+PropertyChart {
+    background: $surface;
+    border: round $primary-muted;
+    height: 100%;
+    padding: 1;
+}
+
+Sparkline {
+    height: 1fr;
+    margin: 1 0;
+    color: $secondary;
+}
+
+/* 启动遮罩层 */
+#loading-overlay {
+    layer: overlay;
+    width: 100%;
+    height: 100%;
+    content-align: center middle;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+}
+
+#loading-overlay Label {
+    margin-top: 1;
+    color: $accent;
+    text-style: bold;
+}
+
+.card-title { color: $text-muted; text-align: center; margin-top: 1; }
+Digits { text-align: center; color: $secondary; }
