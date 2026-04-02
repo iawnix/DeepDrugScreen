@@ -71,12 +71,12 @@ class StatCard(Static):
 
 
 class LigandTUI(App):
-    # 使用 Ctrl+字母 防止与 SMILES 字符串输入冲突（如氟元素 F，硫元素 S）
+    # 【核心修改区】使用 F1, F2, F5 彻底避开终端拦截以及 SMILES 字符输入冲突
     BINDINGS = [
         Binding("ctrl+q", "quit", "Quit", show=True), 
-        Binding("ctrl+r", "refresh", "Refresh", show=True),
-        Binding("ctrl+s", "show_stats", "Stats (Charts)", show=True),
-        Binding("ctrl+f", "show_search", "Search", show=True)
+        Binding("f5", "refresh_db", "Refresh", show=True),
+        Binding("f1", "show_stats", "Stats (Charts)", show=True),
+        Binding("f2", "show_search", "Search", show=True)
     ]
     
     CSS_PATH = CSS_FILE_PATH
@@ -103,20 +103,19 @@ class LigandTUI(App):
             # 右侧主要区域：使用 ContentSwitcher 实现视图切换
             with ContentSwitcher(initial="charts-view", id="main-switcher", classes="right-content-area"):
                 
-                # 视图 1 (默认): 属性分布图表 (由 Ctrl+S 触发)
+                # 视图 1 (默认): 属性分布图表 (由 F1 触发)
                 with Container(id="charts-view", classes="charts-container"):
                     yield PropertyChart("Molecular Weight", "mw")
                     yield PropertyChart("LogP", "logp")
                     yield PropertyChart("TPSA", "tpsa")
                     yield PropertyChart("SA Score", "sa_score")
                 
-                # 视图 2: 分子检索界面 (由 Ctrl+F 触发)
+                # 视图 2: 分子检索界面 (由 F2 触发)
                 with Container(id="search-view"):
                     yield Label("🔍 Molecule Search Engine", classes="search-title")
                     with Horizontal(classes="search-inputs"):
                         yield Input(placeholder="Input SMILES", id="input-smiles", classes="search-input")
                         yield Input(placeholder="Input IAWID", id="input-iawid", classes="search-input")
-                        # 新增：检索提交按钮
                         yield Button("Search", id="btn-search", variant="primary")
                     yield RunningAnimation(id="search-anim", classes="hidden")
                     yield DataTable(id="search-results")
@@ -126,28 +125,28 @@ class LigandTUI(App):
         self.load_database_data()
 
     def action_show_stats(self) -> None:
-        """按下 Ctrl+S: 切换到属性分布图表界面"""
+        """按下 F1: 切换到属性分布图表界面"""
         switcher = self.query_one("#main-switcher", ContentSwitcher)
         switcher.current = "charts-view"
-        self.query_one("#status-bar").update("✅ Chart Mode: Active. Press Ctrl+F to search.")
+        self.query_one("#status-bar").update("✅ Chart Mode: Active. Press F2 to search.")
         self.set_focus(None) # 清除输入框焦点
 
     def action_show_search(self) -> None:
-        """按下 Ctrl+F: 切换到搜索界面"""
+        """按下 F2: 切换到搜索界面"""
         switcher = self.query_one("#main-switcher", ContentSwitcher)
         switcher.current = "search-view"
         self.query_one("#status-bar").update("🔍 Search Mode: Active. Input SMILES/IAWID and click Search.")
         self.query_one("#input-smiles").focus()
 
-    def action_refresh(self) -> None:
-        """按下 Ctrl+R: 只有在图表模式下才执行刷新"""
+    def action_refresh_db(self) -> None:
+        """按下 F5: 严格按照要求，只有在图表模式(F1)下才执行刷新"""
         switcher = self.query_one("#main-switcher", ContentSwitcher)
         if switcher.current == "charts-view":
             self.query_one("#status-bar").update("🔄 Refreshing database...")
             self.load_database_data()
         else:
-            # 如果在搜索界面按下刷新，提示用户
-            self.notify("Refresh (Ctrl+R) is only available in Stats Mode (Ctrl+S).", severity="warning")
+            # 如果在检索界面(F2)按 F5，给予警告并拒绝刷新
+            self.notify("Refresh (F5) is only available in Stats Mode (F1).", severity="warning")
 
     @on(Button.Pressed, "#btn-search")
     def handle_search_button(self, event: Button.Pressed) -> None:
@@ -156,7 +155,7 @@ class LigandTUI(App):
         iawid_val = self.query_one("#input-iawid").value.strip()
 
         if smiles_val:
-            self.query_one("#input-iawid").value = "" # 清空另一侧
+            self.query_one("#input-iawid").value = "" # 自动清空另一侧
             self.run_search_task("smiles", smiles_val)
         elif iawid_val:
             self.run_search_task("iawid", iawid_val)
@@ -236,7 +235,7 @@ class LigandTUI(App):
                 self.load_single_property("tpsa"),
                 self.load_single_property("sa_score")
             )
-            self.query_one("#status-bar").update("✅ Data Synchronized. Press Ctrl+F to search.")
+            self.query_one("#status-bar").update("✅ Data Synchronized. Press F2 to search.")
         except Exception as e:
             self.notify(f"Connection Failed: {e}", severity="error")
 
