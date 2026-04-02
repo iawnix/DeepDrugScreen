@@ -112,14 +112,26 @@ class ligand_db_manager:
         返回: {'bin_edges': [], 'counts': []}
         """
         # SQL 原生计算直方图，避免将千万数据拉取到内存
+        # 增加 WHERE {column} IS NOT NULL 过滤
         query = text(f"""
             SELECT width_bucket({column}, min_val, max_val, :b) as bucket,
                    count(*) as cnt,
                    min({column}) as range_start
             FROM mol_properties, 
-                 (SELECT min({column}) as min_val, max({column}) as max_val FROM mol_properties) as stats
+                 (SELECT min({column}) as min_val, max({column}) as max_val 
+                  FROM mol_properties 
+                  WHERE {column} IS NOT NULL) as stats
+            WHERE {column} IS NOT NULL
             GROUP BY bucket ORDER BY bucket;
         """)
+        #query = text(f"""
+        #    SELECT width_bucket({column}, min_val, max_val, :b) as bucket,
+        #           count(*) as cnt,
+        #           min({column}) as range_start
+        #    FROM mol_properties, 
+        #         (SELECT min({column}) as min_val, max({column}) as max_val FROM mol_properties) as stats
+        #    GROUP BY bucket ORDER BY bucket;
+        #""")
         with self.engine.connect() as conn:
             result = conn.execute(query, {"b": bins}).fetchall()
             return {

@@ -1,39 +1,84 @@
-/* 1. 定义层级：后面的层会盖在前面的层上面 */
-Screen { 
-    layers: base overlay; 
-    background: $boost; 
+/* 基础层级定义 - macOS 深色审美 */
+Screen {
+    layers: base overlay;
+    background: #1E1E1E;
 }
 
-/* 顶部数码管时钟容器 */
+/* 顶部时钟区域 */
 #clock-container {
-    layer: base;
     column-span: 2;
-    background: $surface;
-    border-bottom: tall $primary;
+    background: #2D2D2D; 
+    border-bottom: solid #3D3D3D;
     content-align: center middle;
+    height: 1fr;
 }
 
 #clock-digits {
-    color: $accent;
+    color: #0A84FF;
     text-style: bold;
 }
 
-/* 主网格布局 */
+/* 核心网格布局 */
 #main-grid {
-    layer: base;
     layout: grid;
     grid-size: 2 3;
     grid-columns: 1fr 4fr;
     grid-rows: 15% 10% 75%;
 }
 
-/* 侧边栏样式 */
+/* 侧边栏整体 */
 .stat-sidebar {
     row-span: 2;
-    background: $surface;
-    border: tall $primary; 
-    border-left: none; border-top: none; border-bottom: none;
+    background: #252525;
+    border-right: solid #3D3D3D;
+    padding: 0;
+}
+
+/* 侧边栏比例调整 */
+#sidebar-top {
+    height: 30%;
+    content-align: center middle;
     padding: 1;
+}
+
+#sidebar-divider {
+    height: 1;
+    background: #3D3D3D;
+    margin: 0 2;
+}
+
+#sidebar-bottom {
+    height: 70%;
+    content-align: left top;
+    padding: 2;
+}
+
+/* 字符画与作者信息样式 */
+SidebarBackground {
+    color: #f87d7d;
+    text-align: left; /* 修改为左对齐 */
+    width: 100%;
+}
+
+.stat-sidebar StatCard {
+    height: auto;
+    content-align: center middle;
+}
+
+.card-label {
+    color: #8E8E93;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 1;
+}
+
+/* 状态栏 */
+#status-bar {
+    background: #161616;
+    color: #EBEBF5;
+    padding: 0 1;
+    content-align: left middle;
+    text-style: italic;
 }
 
 /* 图表容器 */
@@ -45,33 +90,38 @@ Screen {
 }
 
 PropertyChart {
-    background: $surface;
-    border: round $primary-muted;
+    background: #2D2D2D;
+    border: solid #3D3D3D;
     height: 100%;
     padding: 1;
 }
 
+.chart-title-text {
+    text-style: bold;
+    color: #30D158;
+}
+
+/* 动画与分布线 */
 Sparkline {
     height: 1fr;
     margin: 1 0;
-    color: $secondary;
+    color: #FF9F0A;
 }
 
-/* 启动遮罩层 */
-#loading-overlay {
-    layer: overlay;
-    width: 100%;
-    height: 100%;
+RunningAnimation {
     content-align: center middle;
-    background: rgba(0, 0, 0, 0.8);
-    display: none;
+    width: 100%;
+    height: 1fr;
+    color: #64D2FF;
 }
 
-#loading-overlay Label {
-    margin-top: 1;
-    color: $accent;
-    text-style: bold;
+/* 通用隐藏类 */
+.hidden {
+    display: none !important;
 }
 
-.card-title { color: $text-muted; text-align: center; margin-top: 1; }
-Digits { text-align: center; color: $secondary; }
+/* 覆盖数据展示样式 */
+Digits {
+    color: #FFFFFF;
+    text-align: center;
+}

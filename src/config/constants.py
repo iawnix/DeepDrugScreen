@@ -1,7 +1,54 @@
-
 PSQ_DB_HOST = "iawnix.xyz"
 PSQ_DB_PORT = "10101"
 PSQ_DB_USR = "zjh"
 PSQ_DB_PASSWD = "your_secure_password" 
 PSQ_DB_NAME = "ligand_db1"
 
+
+MOVIE_1 = [
+        r"  ^_^  \n /(•ω•)/\n  /  \\",
+        r"  ^_^  /\n/(•ω•) \n /  \\",
+        r"  >w<  \n \(•ω•)/\n  \  /",
+        r"  >w< /\n \(•ω•) \n  \  /",
+        r"  ^_^  \n /(•ω•)/\n  /  \\",
+        r"  ^_^  /\n/(•ω•) \n /  \\",
+        r"  >w<  \n \(•ω•)/\n  \  /",
+        r"  >w< /\n \(•ω•) \n  \  /",
+]
+
+MOVIE_2 = [
+        "  o  \n /|\\ \n / \\ ", 
+        "  o_ \n <|  \n / > ", 
+        " _o  \n  |> \n < \\ "
+]
+
+
+MOVIE_3 = [
+        "  ╭(・ω・)╮\n  🏀        \n  ────────── ",
+        "  (・ω・)╭ 🏀\n            \n  ────────── ",
+        "╭(・ω・)    \n    🏀      \n  ────────── ",
+        "  ╭(・ω・)╮\n  🏀        \n  ────────── ",
+        "  (・ω・)／🏀\n            \n  ────────── ",
+        "  (☆ω☆)    \n     🏀     \n  ────────── ",
+]
+
+
+INFO_SIDEBAR = r"""[bold]DeepDrugScreen:[/bold]
+     .-. __ _ .-. 
+     |  `  / \  | 
+     /     '.()--\ 
+    |         '._/ 
+   _| O   _   O |_ 
+   =\    '-'    /= 
+     '-._____.-' 
+     /`/\___/\`\ 
+    /\/o     o\/\ 
+   (_|         |_)  
+     |____,____| 
+     (____|____) 
+
+[bold]Author: [/bold]
+[italic] Xiao He [/italic]
+[bold]Email: [/bold]
+[italic] xiaohe@phy.ecnu.edu.cn[/italic]
+"""
