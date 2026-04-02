@@ -1,6 +1,5 @@
 /* 基础层级定义 - macOS 深色审美 */
 Screen {
-    layers: base overlay;
     background: #1E1E1E;
 }
 
@@ -56,7 +55,7 @@ Screen {
 /* 字符画与作者信息样式 */
 SidebarBackground {
     color: #f87d7d;
-    text-align: left; /* 修改为左对齐 */
+    text-align: left;
     width: 100%;
 }
 
@@ -124,4 +123,53 @@ RunningAnimation {
 Digits {
     color: #FFFFFF;
     text-align: center;
+}
+
+/* =========================================
+   检索视图 (Search View) 相关样式
+   ========================================= */
+
+.right-content-area {
+    height: 100%;
+    width: 100%;
+}
+
+#search-view {
+    layout: vertical;
+    padding: 1 2;
+    background: #2D2D2D;
+    border: solid #3D3D3D;
+}
+
+.search-title {
+    text-style: bold;
+    color: #30D158;
+    margin-bottom: 1;
+}
+
+.search-inputs {
+    height: auto;
+    margin-bottom: 1;
+    align: left middle;
+}
+
+.search-input {
+    width: 1fr;
+    margin-right: 1;
+}
+
+#btn-search {
+    min-width: 16;
+    margin-left: 1;
+}
+
+#search-results {
+    height: 1fr;
+    border: solid #3D3D3D;
+    background: #1E1E1E;
+}
+
+#search-anim {
+    content-align: center middle;
+    height: 1fr;
 }
