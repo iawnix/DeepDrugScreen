@@ -6,7 +6,7 @@ from typing import Dict, Any
 
 from textual import work, on
 from textual.app import App, ComposeResult
-from textual.widgets import Header, Footer, Static, Label, Sparkline, Digits, Input, DataTable, ContentSwitcher, Button
+from textual.widgets import Header, Footer, Static, Label, Sparkline, Digits, Input, DataTable, ContentSwitcher, Button, RadioSet, RadioButton
 from textual.containers import Container, Vertical, Horizontal, Grid
 from textual.binding import Binding
 
@@ -71,12 +71,12 @@ class StatCard(Static):
 
 
 class LigandTUI(App):
-    # 【核心修改区】使用 F1, F2, F5 彻底避开终端拦截以及 SMILES 字符输入冲突
     BINDINGS = [
         Binding("ctrl+q", "quit", "Quit", show=True), 
         Binding("f5", "refresh_db", "Refresh", show=True),
-        Binding("f1", "show_stats", "Stats (Charts)", show=True),
-        Binding("f2", "show_search", "Search", show=True)
+        Binding("f1", "show_stats", "Stats", show=True),
+        Binding("f2", "show_search", "Search", show=True),
+        Binding("f3", "show_export", "Export", show=True)
     ]
     
     CSS_PATH = CSS_FILE_PATH
@@ -85,11 +85,9 @@ class LigandTUI(App):
         yield Footer()
 
         with Grid(id="main-grid"):
-            # 顶部：时钟
             with Horizontal(id="clock-container"):
                 yield Digits("", id="clock-digits")
             
-            # 左侧：侧边栏
             with Vertical(classes="stat-sidebar"):
                 with Vertical(id="sidebar-top"):
                     yield StatCard("Total Molecules", id="total-count")
@@ -97,20 +95,18 @@ class LigandTUI(App):
                 with Vertical(id="sidebar-bottom"):
                     yield SidebarBackground()
             
-            # 中间：状态栏
             yield Static("🚀 RDKit Engine: Initializing...", id="status-bar")
             
-            # 右侧主要区域：使用 ContentSwitcher 实现视图切换
             with ContentSwitcher(initial="charts-view", id="main-switcher", classes="right-content-area"):
                 
-                # 视图 1 (默认): 属性分布图表 (由 F1 触发)
+                # 视图 1: 属性分布图表
                 with Container(id="charts-view", classes="charts-container"):
                     yield PropertyChart("Molecular Weight", "mw")
                     yield PropertyChart("LogP", "logp")
                     yield PropertyChart("TPSA", "tpsa")
                     yield PropertyChart("SA Score", "sa_score")
                 
-                # 视图 2: 分子检索界面 (由 F2 触发)
+                # 视图 2: 分子检索界面
                 with Container(id="search-view"):
                     yield Label("🔍 Molecule Search Engine", classes="search-title")
                     with Horizontal(classes="search-inputs"):
@@ -119,43 +115,189 @@ class LigandTUI(App):
                         yield Button("Search", id="btn-search", variant="primary")
                     yield RunningAnimation(id="search-anim", classes="hidden")
                     yield DataTable(id="search-results")
+                
+                # 视图 3: 高级筛选与批量导出
+                with Container(id="export-view"):
+                    yield Label("📦 Batch Filter & Export to CSV", classes="search-title")
+                    
+                    with Horizontal(classes="export-mode-selector"):
+                        yield Label("Select Mode: ")
+                        with RadioSet(id="export-mode-radios"):
+                            yield RadioButton("Similarity", id="radio-sim", value=True)
+                            yield RadioButton("Substructure", id="radio-sub")
+                            yield RadioButton("Properties", id="radio-prop")
+
+                    with Vertical(id="export-params-container"):
+                        yield Input(placeholder="Target SMILES", id="export-smiles", classes="export-input")
+                        yield Input(placeholder="Similarity Threshold (e.g. 0.7)", value="0.7", id="export-thresh", classes="export-input")
+                        yield Input(placeholder="Max Results Limit (e.g. 10000)", value="10000", id="export-limit", classes="export-input")
+                        
+                        with Vertical(id="export-prop-inputs", classes="hidden"):
+                            yield Input(placeholder="MW range (e.g. 200,500)", id="prop-mw", classes="export-input")
+                            yield Input(placeholder="LogP range (e.g. 0,5)", id="prop-logp", classes="export-input")
+                            yield Input(placeholder="TPSA range (e.g. 20,100)", id="prop-tpsa", classes="export-input")
+
+                    with Horizontal(classes="export-actions"):
+                        yield Input(placeholder="Output Filename (e.g. output.csv)", value="output.csv", id="export-filename", classes="export-input")
+                        yield Button("Run & Export", id="btn-export", variant="success")
+                    
+                    yield Label("", id="export-status-label")
+
 
     def on_mount(self) -> None:
         self.set_interval(1.0, self.update_clock)
         self.load_database_data()
 
+    # --- 视图切换逻辑 ---
     def action_show_stats(self) -> None:
-        """按下 F1: 切换到属性分布图表界面"""
         switcher = self.query_one("#main-switcher", ContentSwitcher)
         switcher.current = "charts-view"
-        self.query_one("#status-bar").update("✅ Chart Mode: Active. Press F2 to search.")
-        self.set_focus(None) # 清除输入框焦点
+        self.query_one("#status-bar").update("✅ Chart Mode: Active. Press F2 to Search, F3 to Export.")
+        self.set_focus(None)
 
     def action_show_search(self) -> None:
-        """按下 F2: 切换到搜索界面"""
         switcher = self.query_one("#main-switcher", ContentSwitcher)
         switcher.current = "search-view"
-        self.query_one("#status-bar").update("🔍 Search Mode: Active. Input SMILES/IAWID and click Search.")
+        self.query_one("#status-bar").update("🔍 Search Mode: Active. Input SMILES/IAWID and press Enter.")
         self.query_one("#input-smiles").focus()
+        
+    def action_show_export(self) -> None:
+        switcher = self.query_one("#main-switcher", ContentSwitcher)
+        switcher.current = "export-view"
+        self.query_one("#status-bar").update("📦 Export Mode: Active. Press Enter to run export.")
+        self.query_one("#export-smiles").focus()
 
     def action_refresh_db(self) -> None:
-        """按下 F5: 严格按照要求，只有在图表模式(F1)下才执行刷新"""
         switcher = self.query_one("#main-switcher", ContentSwitcher)
         if switcher.current == "charts-view":
             self.query_one("#status-bar").update("🔄 Refreshing database...")
             self.load_database_data()
         else:
-            # 如果在检索界面(F2)按 F5，给予警告并拒绝刷新
             self.notify("Refresh (F5) is only available in Stats Mode (F1).", severity="warning")
 
+
+    # --- 统一的回车提交控制 (Enter Key Submit) ---
+    @on(Input.Submitted)
+    def handle_inputs_submit(self, event: Input.Submitted) -> None:
+        # 如果是在 F2 搜索界面按回车
+        if event.input.id in ["input-smiles", "input-iawid"]:
+            self.handle_search_action()
+        # 如果是在 F3 导出界面的任意输入框按回车
+        elif event.input.id in ["export-smiles", "export-thresh", "export-limit", "prop-mw", "prop-logp", "prop-tpsa", "export-filename"]:
+            self.execute_export()
+
+    # --- 导出视图特有交互逻辑 ---
+    @on(RadioSet.Changed, "#export-mode-radios")
+    def handle_export_mode_change(self, event: RadioSet.Changed) -> None:
+        selected_id = event.pressed.id
+        
+        smiles_input = self.query_one("#export-smiles")
+        thresh_input = self.query_one("#export-thresh")
+        limit_input = self.query_one("#export-limit")
+        prop_inputs = self.query_one("#export-prop-inputs")
+        
+        if selected_id == "radio-sim":
+            smiles_input.display = True
+            thresh_input.display = True
+            limit_input.display = True
+            prop_inputs.display = False
+        elif selected_id == "radio-sub":
+            smiles_input.display = True
+            thresh_input.display = False
+            limit_input.display = True
+            prop_inputs.display = False
+        elif selected_id == "radio-prop":
+            smiles_input.display = False
+            thresh_input.display = False
+            limit_input.display = False
+            prop_inputs.display = True
+
+    @on(Button.Pressed, "#btn-export")
+    def handle_export_button(self, event: Button.Pressed) -> None:
+        self.execute_export()
+
+    def execute_export(self) -> None:
+        """核心的参数收集与任务下发逻辑"""
+        radios = self.query_one("#export-mode-radios", RadioSet)
+        if not radios.pressed_button:
+            return
+            
+        mode_id = radios.pressed_button.id
+        filename = self.query_one("#export-filename").value.strip() or "output.csv"
+        params = {}
+
+        if mode_id in ["radio-sim", "radio-sub"]:
+            params["smiles"] = self.query_one("#export-smiles").value.strip()
+            params["limit"] = int(self.query_one("#export-limit").value.strip() or 10000)
+            if mode_id == "radio-sim":
+                params["thresh"] = float(self.query_one("#export-thresh").value.strip() or 0.7)
+                
+            if not params["smiles"]:
+                self.notify("Target SMILES is required for this mode!", severity="error")
+                return
+
+        elif mode_id == "radio-prop":
+            conditions = {}
+            for prop in ["mw", "logp", "tpsa"]:
+                val = self.query_one(f"#prop-{prop}").value.strip()
+                if val:
+                    try:
+                        vmin, vmax = map(float, val.split(","))
+                        conditions[prop] = (vmin, vmax)
+                    except ValueError:
+                        self.notify(f"Invalid format for {prop.upper()}. Use 'min,max' (e.g. 200,500)", severity="error")
+                        return
+            if not conditions:
+                self.notify("At least one property condition is required!", severity="error")
+                return
+            params["conditions"] = conditions
+
+        self.run_export_task(mode_id, params, filename)
+
+    @work(exclusive=True)
+    async def run_export_task(self, mode_id: str, params: dict, filename: str) -> None:
+        status_label = self.query_one("#export-status-label")
+        status_label.update("⏳ Querying database and generating CSV, please wait...")
+        self.query_one("#btn-export").disabled = True
+
+        try:
+            if mode_id == "radio-sim":
+                df = await asyncio.to_thread(
+                    self.db.search_by_similarity, params["smiles"], params["thresh"], include_props=True, limit=params["limit"]
+                )
+            elif mode_id == "radio-sub":
+                df = await asyncio.to_thread(
+                    self.db.search_by_substructure, params["smiles"], include_props=True, limit=params["limit"]
+                )
+            elif mode_id == "radio-prop":
+                df = await asyncio.to_thread(
+                    self.db.filter_by_prop, params["conditions"]
+                )
+
+            if df is not None and not df.empty:
+                await asyncio.to_thread(df.to_csv, filename, index=False)
+                status_label.update(f"✅ Success! Exported {len(df)} molecules to '{filename}'.")
+            else:
+                status_label.update("⚠️ No molecules matched the given criteria.")
+                
+        except Exception as e:
+            self.notify(f"Export Failed: {e}", severity="error")
+            status_label.update(f"❌ Error: {e}")
+        finally:
+            self.query_one("#btn-export").disabled = False
+
+
+    # --- 检索视图交互逻辑 ---
     @on(Button.Pressed, "#btn-search")
-    def handle_search_button(self, event: Button.Pressed) -> None:
-        """点击 Search 按钮触发的事件"""
+    def on_search_button_pressed(self, event: Button.Pressed) -> None:
+        self.handle_search_action()
+        
+    def handle_search_action(self) -> None:
         smiles_val = self.query_one("#input-smiles").value.strip()
         iawid_val = self.query_one("#input-iawid").value.strip()
 
         if smiles_val:
-            self.query_one("#input-iawid").value = "" # 自动清空另一侧
+            self.query_one("#input-iawid").value = ""
             self.run_search_task("smiles", smiles_val)
         elif iawid_val:
             self.run_search_task("iawid", iawid_val)
@@ -164,7 +306,6 @@ class LigandTUI(App):
 
     @work(exclusive=True)
     async def run_search_task(self, search_type: str, query: str) -> None:
-        """异步执行数据库检索"""
         table = self.query_one("#search-results", DataTable)
         anim = self.query_one("#search-anim")
         
@@ -188,7 +329,6 @@ class LigandTUI(App):
             table.remove_class("hidden")
 
     def _update_table(self, df) -> None:
-        """将 Pandas DataFrame 渲染到 Textual DataTable 组件中"""
         table = self.query_one("#search-results", DataTable)
         table.clear(columns=True)
         
@@ -196,13 +336,14 @@ class LigandTUI(App):
             df = df.fillna("")
             columns = [str(col).upper() for col in df.columns.tolist()]
             table.add_columns(*columns)
-            
             for _, row in df.iterrows():
                 table.add_row(*[str(val) for val in row.tolist()])
         else:
             table.add_columns("Result")
             table.add_row("No molecules found.")
 
+
+    # --- 底层环境维持逻辑 ---
     def update_clock(self) -> None:
         self.query_one("#clock-digits").update(datetime.now().strftime("%H:%M:%S"))
 
@@ -235,7 +376,7 @@ class LigandTUI(App):
                 self.load_single_property("tpsa"),
                 self.load_single_property("sa_score")
             )
-            self.query_one("#status-bar").update("✅ Data Synchronized. Press F2 to search.")
+            self.query_one("#status-bar").update("✅ Data Synchronized. F1: Stats, F2: Search, F3: Export.")
         except Exception as e:
             self.notify(f"Connection Failed: {e}", severity="error")
 

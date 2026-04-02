@@ -33,7 +33,6 @@ Screen {
     padding: 0;
 }
 
-/* 侧边栏比例调整 */
 #sidebar-top {
     height: 30%;
     content-align: center middle;
@@ -52,7 +51,6 @@ Screen {
     padding: 2;
 }
 
-/* 字符画与作者信息样式 */
 SidebarBackground {
     color: #f87d7d;
     text-align: left;
@@ -71,7 +69,6 @@ SidebarBackground {
     margin-bottom: 1;
 }
 
-/* 状态栏 */
 #status-bar {
     background: #161616;
     color: #EBEBF5;
@@ -80,7 +77,6 @@ SidebarBackground {
     text-style: italic;
 }
 
-/* 图表容器 */
 .charts-container {
     layout: grid;
     grid-size: 2 2;
@@ -100,7 +96,6 @@ PropertyChart {
     color: #30D158;
 }
 
-/* 动画与分布线 */
 Sparkline {
     height: 1fr;
     margin: 1 0;
@@ -114,12 +109,10 @@ RunningAnimation {
     color: #64D2FF;
 }
 
-/* 通用隐藏类 */
 .hidden {
     display: none !important;
 }
 
-/* 覆盖数据展示样式 */
 Digits {
     color: #FFFFFF;
     text-align: center;
@@ -128,7 +121,6 @@ Digits {
 /* =========================================
    检索视图 (Search View) 相关样式
    ========================================= */
-
 .right-content-area {
     height: 100%;
     width: 100%;
@@ -172,4 +164,66 @@ Digits {
 #search-anim {
     content-align: center middle;
     height: 1fr;
+}
+
+/* =========================================
+   导出视图 (Export View) 相关样式
+   ========================================= */
+#export-view {
+    layout: vertical;
+    padding: 1 2;
+    background: #2D2D2D;
+    border: solid #3D3D3D;
+    overflow-y: auto;
+}
+
+.export-mode-selector {
+    height: auto;
+    margin-bottom: 1;
+    align: left middle;
+}
+
+#export-mode-radios {
+    layout: horizontal;
+    height: auto;
+}
+
+#export-mode-radios RadioButton {
+    width: auto;
+    margin-right: 2;
+}
+
+#export-params-container {
+    height: auto;
+    margin-bottom: 1;
+    border: round #3D3D3D;
+    padding: 1;
+    background: #252525;
+}
+
+.export-input {
+    margin-bottom: 1;
+}
+
+.export-actions {
+    layout: horizontal;
+    height: auto;
+    align: left middle;
+    margin-top: 1;
+}
+
+#export-filename {
+    width: 1fr;
+    margin-right: 1;
+}
+
+#btn-export {
+    width: auto;
+    min-width: 18;
+}
+
+#export-status-label {
+    color: #30D158;
+    text-style: bold;
+    margin-top: 1;
 }
