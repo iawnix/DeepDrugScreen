@@ -10,7 +10,6 @@ from textual.widgets import Header, Footer, Static, Label, Sparkline, Digits, In
 from textual.containers import Container, Vertical, Horizontal, Grid
 from textual.binding import Binding
 
-# 路径配置
 src_path = Path(__file__).parent.resolve()
 sys.path.append(str(src_path))
 
@@ -30,12 +29,12 @@ PSQ_DB_NAME = os.getenv("PSQ_DB_NAME")
 CSS_FILE_PATH = src_path / "config" / "db_tui_style.tcss"
 
 class SidebarBackground(Static):
-    """侧边栏底部的项目信息与字符画装饰组件"""
+    # Author Info
     def on_mount(self) -> None:
         self.update(INFO_SIDEBAR)
 
 class RunningAnimation(Static):
-    """ASCII 动态加载动画"""
+    # ASCII Moive
     def on_mount(self) -> None:
         self.frames = MOVIE_3
         self.current_frame = 0
@@ -43,23 +42,24 @@ class RunningAnimation(Static):
 
     def next_frame(self) -> None:
         art = self.frames[self.current_frame].replace(r"\n", "\n")
-        self.update(f"[cyan]{art}[/]\n[italic][#64D2FF]Calculating...[/]")
+        self.update("[cyan]{}[/]\n[italic][#64D2FF]Calculating...[/]".format(art))
         self.current_frame = (self.current_frame + 1) % len(self.frames)
 
 class PropertyChart(Static):
-    """分子属性图表组件"""
+    # Mol Prop Info
     def __init__(self, title: str, prop_name: str):
         super().__init__()
         self.title = title
         self.prop_name = prop_name
 
     def compose(self) -> ComposeResult:
-        yield Label(f"📊 {self.title}", classes="chart-title-text")
-        yield RunningAnimation(id=f"loading-{self.prop_name}", classes="loader")
-        yield Sparkline(id=f"spark-{self.prop_name}", classes="hidden")
+        yield Label("󱎏 {}".format(self.title), classes="chart-title-text")
+        yield RunningAnimation(id="loading-{}".format(self.prop_name), classes="loader")
+        yield Sparkline(id="spark-{}".format(self.prop_name), classes="hidden")
 
 class StatCard(Static):
-    """侧边栏统计卡片"""
+    
+    # Sum of mol in database 
     def __init__(self, label: str, id: str):
         super().__init__(id=id)
         self.label = label
@@ -67,10 +67,12 @@ class StatCard(Static):
     def compose(self) -> ComposeResult:
         with Vertical():
             yield Label(self.label, classes="card-label")
-            yield Digits("0", id=f"{self.id}-digits")
+            yield Digits("0", id="{}-digits".format(self.id))
 
 
-class LigandTUI(App):
+class DB_TUI(App):
+
+    # key map
     BINDINGS = [
         Binding("ctrl+q", "quit", "Quit", show=True), 
         Binding("f5", "refresh_db", "Refresh", show=True),
@@ -385,4 +387,4 @@ class LigandTUI(App):
         self.query_one("#total-count-digits").update(f"{count}")
         
 if __name__ == "__main__":
-    LigandTUI().run()
+    DB_TUI().run()
