@@ -15,6 +15,8 @@ Screen {
 #clock-digits {
     color: #0A84FF;
     text-style: bold;
+    content-align: center middle;
+    height: 100%;
 }
 
 /* 核心网格布局 */

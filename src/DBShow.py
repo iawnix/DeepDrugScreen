@@ -76,7 +76,7 @@ class DB_TUI(App):
     BINDINGS = [
         Binding("ctrl+q", "quit", "Quit", show=True), 
         Binding("f5", "refresh_db", "Refresh", show=True),
-        Binding("f1", "show_stats", "Stats", show=True),
+        Binding("f1", "show_status", "Status", show=True),
         Binding("f2", "show_search", "Search", show=True),
         Binding("f3", "show_export", "Export", show=True)
     ]
@@ -85,11 +85,13 @@ class DB_TUI(App):
 
     def compose(self) -> ComposeResult:
         yield Footer()
-
         with Grid(id="main-grid"):
+
+            # time
             with Horizontal(id="clock-container"):
                 yield Digits("", id="clock-digits")
             
+            # sum of mol and author info
             with Vertical(classes="stat-sidebar"):
                 with Vertical(id="sidebar-top"):
                     yield StatCard("Total Molecules", id="total-count")
@@ -97,20 +99,22 @@ class DB_TUI(App):
                 with Vertical(id="sidebar-bottom"):
                     yield SidebarBackground()
             
-            yield Static("🚀 RDKit Engine: Initializing...", id="status-bar")
+            # status bar
+            yield Static("DBShow: Initializing...", id="status-bar")
             
+            # main interactive area
             with ContentSwitcher(initial="charts-view", id="main-switcher", classes="right-content-area"):
                 
-                # 视图 1: 属性分布图表
+                # Function 1 <f1>: Show mol prop info 
                 with Container(id="charts-view", classes="charts-container"):
                     yield PropertyChart("Molecular Weight", "mw")
                     yield PropertyChart("LogP", "logp")
                     yield PropertyChart("TPSA", "tpsa")
                     yield PropertyChart("SA Score", "sa_score")
                 
-                # 视图 2: 分子检索界面
+                # Function 2 <2>: Search mol
                 with Container(id="search-view"):
-                    yield Label("🔍 Molecule Search Engine", classes="search-title")
+                    yield Label("󱘶 Molecule Search", classes="search-title")
                     with Horizontal(classes="search-inputs"):
                         yield Input(placeholder="Input SMILES", id="input-smiles", classes="search-input")
                         yield Input(placeholder="Input IAWID", id="input-iawid", classes="search-input")
@@ -118,9 +122,9 @@ class DB_TUI(App):
                     yield RunningAnimation(id="search-anim", classes="hidden")
                     yield DataTable(id="search-results")
                 
-                # 视图 3: 高级筛选与批量导出
+                # Function 3 <f3>: Batch filter & export
                 with Container(id="export-view"):
-                    yield Label("📦 Batch Filter & Export to CSV", classes="search-title")
+                    yield Label(" Batch Filter & Export to CSV", classes="search-title")
                     
                     with Horizontal(classes="export-mode-selector"):
                         yield Label("Select Mode: ")
@@ -145,50 +149,50 @@ class DB_TUI(App):
                     
                     yield Label("", id="export-status-label")
 
-
     def on_mount(self) -> None:
         self.set_interval(1.0, self.update_clock)
         self.load_database_data()
 
-    # --- 视图切换逻辑 ---
-    def action_show_stats(self) -> None:
+    # function for key bindings
+    def action_show_status(self) -> None:
         switcher = self.query_one("#main-switcher", ContentSwitcher)
         switcher.current = "charts-view"
-        self.query_one("#status-bar").update("✅ Chart Mode: Active. Press F2 to Search, F3 to Export.")
+        self.query_one("#status-bar").update("Info[iaw]:> Overview Mode: Active. Press F2 to Search, F3 to Export.")
         self.set_focus(None)
 
     def action_show_search(self) -> None:
         switcher = self.query_one("#main-switcher", ContentSwitcher)
         switcher.current = "search-view"
-        self.query_one("#status-bar").update("🔍 Search Mode: Active. Input SMILES/IAWID and press Enter.")
+        self.query_one("#status-bar").update("Info[iaw]:> Search Mode: Active. Input SMILES/IAWID and press Enter.")
         self.query_one("#input-smiles").focus()
         
     def action_show_export(self) -> None:
         switcher = self.query_one("#main-switcher", ContentSwitcher)
         switcher.current = "export-view"
-        self.query_one("#status-bar").update("📦 Export Mode: Active. Press Enter to run export.")
+        self.query_one("#status-bar").update("Info[iaw]:> Export Mode: Active. Press Enter to run export.")
         self.query_one("#export-smiles").focus()
 
     def action_refresh_db(self) -> None:
         switcher = self.query_one("#main-switcher", ContentSwitcher)
         if switcher.current == "charts-view":
-            self.query_one("#status-bar").update("🔄 Refreshing database...")
+            self.query_one("#status-bar").update("Info[iaw]:> Refreshing database...")
             self.load_database_data()
         else:
-            self.notify("Refresh (F5) is only available in Stats Mode (F1).", severity="warning")
+            self.notify("Error[iaw]:> Refresh (F5) is only available in Stats Mode (F1).", severity="error")
 
 
-    # --- 统一的回车提交控制 (Enter Key Submit) ---
+    # Enter Key
     @on(Input.Submitted)
     def handle_inputs_submit(self, event: Input.Submitted) -> None:
-        # 如果是在 F2 搜索界面按回车
+
+        # <F2>
         if event.input.id in ["input-smiles", "input-iawid"]:
             self.handle_search_action()
-        # 如果是在 F3 导出界面的任意输入框按回车
+        # <F3>
         elif event.input.id in ["export-smiles", "export-thresh", "export-limit", "prop-mw", "prop-logp", "prop-tpsa", "export-filename"]:
             self.execute_export()
 
-    # --- 导出视图特有交互逻辑 ---
+    # Export Mode
     @on(RadioSet.Changed, "#export-mode-radios")
     def handle_export_mode_change(self, event: RadioSet.Changed) -> None:
         selected_id = event.pressed.id
@@ -198,31 +202,39 @@ class DB_TUI(App):
         limit_input = self.query_one("#export-limit")
         prop_inputs = self.query_one("#export-prop-inputs")
         
-        if selected_id == "radio-sim":
-            smiles_input.display = True
-            thresh_input.display = True
-            limit_input.display = True
-            prop_inputs.display = False
-        elif selected_id == "radio-sub":
-            smiles_input.display = True
-            thresh_input.display = False
-            limit_input.display = True
-            prop_inputs.display = False
-        elif selected_id == "radio-prop":
-            smiles_input.display = False
-            thresh_input.display = False
-            limit_input.display = False
-            prop_inputs.display = True
+        match selected_id:
+            case "radio-sim":
+                smiles_input.display = True
+                thresh_input.display = True
+                limit_input.display = True
+                prop_inputs.display = False
+            case "radio-sub":
+                smiles_input.display = True
+                thresh_input.display = False
+                limit_input.display = True
+                prop_inputs.display = False
+            case "radio-prop":
+                smiles_input.display = False
+                thresh_input.display = False
+                limit_input.display = False
+                prop_inputs.display = True
+            # 这种情况应该不存在
+            case _:
+                smiles_input.display = False
+                thresh_input.display = False
+                limit_input.display = False
+                prop_inputs.display = False
+
 
     @on(Button.Pressed, "#btn-export")
     def handle_export_button(self, event: Button.Pressed) -> None:
         self.execute_export()
 
     def execute_export(self) -> None:
-        """核心的参数收集与任务下发逻辑"""
+
         radios = self.query_one("#export-mode-radios", RadioSet)
         if not radios.pressed_button:
-            return
+            return None
             
         mode_id = radios.pressed_button.id
         filename = self.query_one("#export-filename").value.strip() or "output.csv"
@@ -235,8 +247,8 @@ class DB_TUI(App):
                 params["thresh"] = float(self.query_one("#export-thresh").value.strip() or 0.7)
                 
             if not params["smiles"]:
-                self.notify("Target SMILES is required for this mode!", severity="error")
-                return
+                self.notify("Error[iaw]:> Target SMILES is required for this mode!", severity="error")
+                return None
 
         elif mode_id == "radio-prop":
             conditions = {}
@@ -247,10 +259,10 @@ class DB_TUI(App):
                         vmin, vmax = map(float, val.split(","))
                         conditions[prop] = (vmin, vmax)
                     except ValueError:
-                        self.notify(f"Invalid format for {prop.upper()}. Use 'min,max' (e.g. 200,500)", severity="error")
+                        self.notify("Error[iaw]:> Invalid format for {}. Use 'min,max' (e.g. 200,500)".format(prop.upper()), severity="error")
                         return
             if not conditions:
-                self.notify("At least one property condition is required!", severity="error")
+                self.notify("Error[iaw]:> At least one property condition is required!", severity="error")
                 return
             params["conditions"] = conditions
 
@@ -259,7 +271,7 @@ class DB_TUI(App):
     @work(exclusive=True)
     async def run_export_task(self, mode_id: str, params: dict, filename: str) -> None:
         status_label = self.query_one("#export-status-label")
-        status_label.update("⏳ Querying database and generating CSV, please wait...")
+        status_label.update("󰔟 Querying database and generating CSV, please wait...")
         self.query_one("#btn-export").disabled = True
 
         try:
@@ -278,13 +290,13 @@ class DB_TUI(App):
 
             if df is not None and not df.empty:
                 await asyncio.to_thread(df.to_csv, filename, index=False)
-                status_label.update(f"✅ Success! Exported {len(df)} molecules to '{filename}'.")
+                status_label.update("Info[iaw]:> Success! Exported {} molecules to `{}`.".format(len(df), filename))
             else:
-                status_label.update("⚠️ No molecules matched the given criteria.")
+                status_label.update("Warning[iaw]:>: No molecules matched the given criteria.")
                 
         except Exception as e:
-            self.notify(f"Export Failed: {e}", severity="error")
-            status_label.update(f"❌ Error: {e}")
+            self.notify("Error[iaw]:> Export Failed: {}".format(e), severity="error")
+            status_label.update("Error[iaw]:> Export Failed: {}".format(e))
         finally:
             self.query_one("#btn-export").disabled = False
 
@@ -313,7 +325,7 @@ class DB_TUI(App):
         
         table.add_class("hidden")
         anim.remove_class("hidden")
-        self.query_one("#status-bar").update(f"⏳ Searching by {search_type}...")
+        self.query_one("#status-bar").update("󰔟 Searching by {}...".format(search_type))
         
         try:
             if search_type == "smiles":
@@ -322,10 +334,10 @@ class DB_TUI(App):
                 df = await asyncio.to_thread(self.db.search_by_iawid, query)
             
             self._update_table(df)
-            self.query_one("#status-bar").update(f"✅ Search Completed. Found {len(df) if df is not None else 0} results.")
+            self.query_one("#status-bar").update("Info[iaw]:> Search Completed. Found {} results.".format(len(df) if df is not None else 0))
         except Exception as e:
-            self.notify(f"Search Failed: {e}", severity="error")
-            self.query_one("#status-bar").update("❌ Search Failed.")
+            self.notify("Error[iaw]:> Search Failed: {}".format(e), severity="error")
+            self.query_one("#status-bar").update("Error[iaw]:> Search Failed.")
         finally:
             anim.add_class("hidden")
             table.remove_class("hidden")
@@ -378,9 +390,9 @@ class DB_TUI(App):
                 self.load_single_property("tpsa"),
                 self.load_single_property("sa_score")
             )
-            self.query_one("#status-bar").update("✅ Data Synchronized. F1: Stats, F2: Search, F3: Export.")
+            self.query_one("#status-bar").update("Info[iaw]:> Data Synchronized. F1: Stats, F2: Search, F3: Export.")
         except Exception as e:
-            self.notify(f"Connection Failed: {e}", severity="error")
+            self.notify("Error[iaw]:> Connection Failed: {}".format(e), severity="error")
 
     def update_total_count(self) -> None:
         count = self.db.get_total_count()
