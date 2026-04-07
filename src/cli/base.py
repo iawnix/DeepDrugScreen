@@ -12,8 +12,11 @@ def CMD_RUN(cmd) -> Tuple[int, str, str]:
     code = proc.returncode
     if error != "":
         if not code:
+            print("Warning[iaw]:> Sucessful: {}, But: {}".format(cmd,error))
             return 1, out, error
         else:
+            print("Error[iaw]:> {}".format(error))
             return 0, out, error
     else:
+        print("Info[iaw]:> Sucessful: {}".format(cmd))
         return 1, out, error
