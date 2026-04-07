@@ -178,7 +178,7 @@ class DB_TUI(App):
             self.query_one("#status-bar").update("Info[iaw]:> Refreshing database...")
             self.load_database_data()
         else:
-            self.notify("Error[iaw]:> Refresh (F5) is only available in Stats Mode (F1).", severity="error")
+            self.notify("Error[iaw]:> Refresh (F5) is only available in Status Mode (F1).", severity="error")
 
 
     # Enter Key
@@ -390,7 +390,7 @@ class DB_TUI(App):
                 self.load_single_property("tpsa"),
                 self.load_single_property("sa_score")
             )
-            self.query_one("#status-bar").update("Info[iaw]:> Data Synchronized. F1: Stats, F2: Search, F3: Export.")
+            self.query_one("#status-bar").update("Info[iaw]:> Data Synchronized. F1: Status, F2: Search, F3: Export.")
         except Exception as e:
             self.notify("Error[iaw]:> Connection Failed: {}".format(e), severity="error")
 
