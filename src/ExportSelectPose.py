@@ -34,7 +34,7 @@ class GetGlideSelectPose():
     def handle_one_job(self, fname: str):
         id1: str = None
         id2: str = None
-        sd: _SDF  = Chem.SDMolSupplier(fname)
+        sd: _SDF  = Chem.SDMolSupplier(fname, sanitize=False, removeHs=False)            # sanitize=False, 避免不必要的错误
         mols: List[Dict] = []
         for i,  i_mol in enumerate(sd):
             if not i_mol:
