@@ -74,7 +74,7 @@ def Parm() -> Namespace:
     parser.add_argument("-SelectID",type=str, nargs=1, default = None,help="SelectID File[csv]: The provided file must be in `CSV` format and contain a required `ID` field.")
     parser.add_argument("-cpu",type=int, nargs=1, default = 1,help="The number of the cpus")
     parser.add_argument("-output",type=str, nargs=1, default = "SelectGlidePose.sdf",help="SaveFile: `SDF` format")
-    parser.add_argument("-verbose",type=bool, nargs=1, default = False,help="Enable detailed output: True / False")
+    parser.add_argument("-verbose",type=bool, default = False,help="Enable detailed output: True / False")
 
     return parser.parse_args()
 
@@ -119,7 +119,7 @@ def main() -> None:
     for var in myjob.s_mols:
         select_pose.extend(var)
 
-    if myP.verbose[0] == True:
+    if myP.verbose == True:
         rprint(select_id)
         rprint(select_pose)
     

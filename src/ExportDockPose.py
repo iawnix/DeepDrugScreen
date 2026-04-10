@@ -89,7 +89,7 @@ def Parm() -> Namespace:
     parser.add_argument("-InFiles",type=str, nargs=1, default = None,help="FilePaths: To process multiple result files, you must manually move all of them into a single directory.")
     parser.add_argument("-cpu",type=int, nargs=1, default = 1,help="The number of the cpus")
     parser.add_argument("-output",type=str, nargs=1, default = "GlideOutPose",help="SavePath: the out[sdf] will be saved here")
-    parser.add_argument("-verbose",type=bool, nargs=1, default = False,help="Enable detailed output: True / False")
+    parser.add_argument("-verbose",type=bool, default = False, help="Enable detailed output: True / False")
 
     return parser.parse_args()
 
@@ -133,7 +133,7 @@ def main() -> None:
     else:
         print("Error[iaw]:> `{}` already exists. Please specify a different directory.".format(savePath))
         sys.exit(-1)
-    if myP.verbose[0] == True:
+    if myP.verbose == True:
         rprint(rootpath, type(rootpath), len(rootpath))
         rprint(fps)
 
