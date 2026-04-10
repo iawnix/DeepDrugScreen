@@ -2,5 +2,6 @@
 src/config/__pycache__/
 src/util/rdkit_postgresql/__pycache__/
 test.ipynb
+.tmp/
 .env
 
