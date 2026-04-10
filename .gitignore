@@ -4,7 +4,5 @@ src/cli/__pycache__/
 src/util/rdkit_postgresql/__pycache__/
 src/util/__pycache__/
 src/util/squeue/__pycache__/
-test.ipynb
-.tmp/
 .env
 
