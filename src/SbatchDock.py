@@ -10,7 +10,6 @@ src_path = Path(__file__).parent.resolve()
 sys.path.append(str(src_path))
 
 from util.squeue.tool import gen_glide_slurm_config, gen_glide_config, write_job_script, write_docker_config
-from config.constants import SCHRODINGER_ENV_HOME, SCHRODINGER_ENV_TMPDIR
 from config.squeue_config import GLIDE_SLURM_CONFIG, GLIDE_CONFIG
 from cli.base import CMD_RUN
 

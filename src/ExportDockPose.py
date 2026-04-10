@@ -1,12 +1,10 @@
 import sys
 import os
-import subprocess
 import argparse
 from argparse import Namespace
 
 from rich import print as rprint
-from typing import List, Tuple, Dict
-from multiprocessing import Pool
+from typing import List
 
 import re
 from pathlib import Path
@@ -17,57 +15,7 @@ from pathlib import Path
 src_path = Path(__file__).parent.resolve()
 sys.path.append(str(src_path))
 
-from cli.base import CMD_RUN
-
-
-class GetGlidePose():
-    def __init__(self, rootpath: str, fps: List[pathlib.PosixPath], savepath: pathlib.PosixPath, maegztype: str) -> None:
-        self.rootpath: str = rootpath
-        self.jobs: List[pathlib.PosixPath] = fps
-        self.savepath: pathlib.PosixPath = savepath
-        self.maegztype: str = maegztype
-
-    def maegzName2Sdf(self, logname: pathlib.PosixPath) -> str:
-        out : str = None
-
-        ss: str = (logname.as_posix())[len(self.rootpath):]
-
-        if ss[0] == "/":
-            ss = ss[1:]
-            
-        if self.maegztype == "d":
-
-            patten = r'([^/]+)\/.*\/Sub-(\d+)\/glideDock-(\d+)\/glideDock-(\d+)\_.*.maegz'
-            match = re.search(patten, ss)
-            if not match:
-                rprint("Error[macth]: {}".format(ss))
-            out: str = "{}_{}_{}.sdf".format(match.group(1), match.group(2), match.group(3), match.group(4))
-            out = os.path.join(self.savepath, out)
-        elif self.maegztype == "f":
-            out: str = ss.replace(".maegz",".sdf")
-            out = os.path.join(self.savepath, out)
-
-        elif self.maegztype == "fs":
-            out: str = ss.replace(".maegz",".sdf")
-            out = os.path.join(self.savepath, out)
-
-        return out
-    
-
-    def handle_one_job(self, fname: str):
-        
-        # save
-        Oname: str = self.maegzName2Sdf(fname)
-        CMD_RUN("structconvert -imae {} -osd {}".format(fname, Oname))
-
-    
-    def multrun(self, num_cpu: int) -> None:
-        pool = Pool(num_cpu)
-        pool.map(self.handle_one_job, self.jobs)
-        pool.close()
-        pool.join()
-
-
+from cli.glide_module import GetGlidePose
 
 def Parm() -> Namespace:
     """

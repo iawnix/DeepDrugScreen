@@ -5,7 +5,14 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent
 sys.path.append(str(project_root))
 
-from config.constants import SCHRODINGER_ENV_HOME, SCHRODINGER_ENV_TMPDIR
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+SCHRODINGER_ENV_HOME = os.getenv("SCHRODINGER_ENV_HOME")
+SCHRODINGER_ENV_TMPDIR = os.getenv("SCHRODINGER_ENV_TMPDIR")
+
 from config.squeue_config import GLIDE_SLURM_CONFIG, GLIDE_CONFIG
 
 def gen_glide_slurm_config(config: GLIDE_SLURM_CONFIG) -> List[str]:

@@ -1,6 +1,5 @@
 import sys
 import os
-import subprocess
 import argparse
 from argparse import Namespace
 
@@ -8,8 +7,7 @@ import pandas as pd
 
 from rich import print as rprint
 from rich.status import Status
-from typing import List, Tuple, Dict
-from multiprocessing import Pool
+from typing import List
 
 from pathlib import Path
 import pathlib
@@ -18,46 +16,7 @@ import glob
 from pathlib import Path
 src_path = Path(__file__).parent.resolve()
 sys.path.append(str(src_path))
-
-from rdkit import Chem
-from rdkit.Chem.rdmolfiles import SDMolSupplier as _SDF
-from rdkit.Chem.rdchem import Mol as _MOL
-
-class GetGlideSelectPose():
-    def __init__(self, rootpath: str, fps: List[pathlib.PosixPath], ids: List[str]) -> None:
-        self.rootpath: str = rootpath
-        self.jobs: List[pathlib.PosixPath] = fps
-
-        self.ids: List[str] = ids
-        self.s_mols: List[List[_MOL]] = None
-
-    def handle_one_job(self, fname: str):
-        id1: str = None
-        id2: str = None
-        sd: _SDF  = Chem.SDMolSupplier(fname, sanitize=False, removeHs=False)            # sanitize=False, 避免不必要的错误
-        mols: List[Dict] = []
-        for i,  i_mol in enumerate(sd):
-            if not i_mol:
-                rprint("Error[iawnix]:sdf read mol\n\t{}, {}".format(fname, i_mol))
-                continue
-            if i != 0:
-                id1 = i_mol.GetProp("s_lp_Variant").split("-")[0]
-                id2 = i_mol.GetProp("_Name")
-                if  id1 == id2 and id2 in self.ids:
-                    i_score = i_mol.GetProp("r_i_docking_score")
-                    var_i: Dict = {"mol":i_mol, "id":id2, "score":i_score}
-                    mols.append(var_i)
-        
-        # 这里将获取的分子保存出来
-        
-        return mols
-
-    def multrun(self, num_cpu: int) -> None:
-        pool = Pool(num_cpu)
-        self.s_mols = pool.map(self.handle_one_job, self.jobs)
-        pool.close()
-        pool.join()
-
+from cli.glide_module import GetGlideSelectPose
 
 def Parm() -> Namespace:
     """

@@ -1,7 +1,4 @@
 
-SCHRODINGER_ENV_HOME="/home/zyq/soft/schrodinger"
-SCHRODINGER_ENV_TMPDIR="/public/home/xiaohe2/iaw/.TMP/schro"
-
 MOVIE_1 = [
         r"  ^_^  \n /(•ω•)/\n  /  \\",
         r"  ^_^  /\n/(•ω•) \n /  \\",

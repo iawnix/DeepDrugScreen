@@ -19,6 +19,7 @@ from util.rdkit_postgresql.DB_Module import ligand_db_manager
 import os
 from dotenv import load_dotenv
 load_dotenv()
+
 PSQ_DB_HOST = os.getenv("PSQ_DB_HOST")
 PSQ_DB_PORT = os.getenv("PSQ_DB_PORT")
 PSQ_DB_USR = os.getenv("PSQ_DB_USR")
@@ -397,6 +398,8 @@ class DB_TUI(App):
     def update_total_count(self) -> None:
         count = self.db.get_total_count()
         self.query_one("#total-count-digits").update(f"{count}")
-        
-if __name__ == "__main__":
+
+def main() -> None:
     DB_TUI().run()
+if __name__ == "__main__":
+    main()

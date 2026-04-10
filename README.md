@@ -1,23 +1,17 @@
-# iawnix
-
-# TUI
-- 采用textual进行TUI设计
-- 可以考虑借助Kitty实现图片的渲染
-
-# TODO:
-1. 配体分子的数据库管理, postgresql
-    1. 配体总数目
-    2. 配体质量分布图
-    3. 配体logP分布图
-2. 基于配体的设计
-    1. VAE的分子生成模型
-3. 基于受体的设计
-4. 高通量分子对接
-    1. 生成对接的分子库名单
-        - 基于相似性检索
-        - 基于分子质量检索
-        - 基于骨架检索
-    2. 生成临时的分子库路径（这里直接就输出到硬盘上）
-5. 免疫诱抗分子靶标收集
-    1. 免疫诱抗分子靶标数据库
-
+# dds
+    - author: iawnix
+    - date: 2026-04-11
+# Install
+- `conda create -n dds python=3.12`
+- `conda activate dds`
+- `pip install .`
+- 设置环境变量
+``` 
+export PSQ_DB_HOST="DB IP"
+export PSQ_DB_PORT="DB PORT"
+export PSQ_DB_USR="DB USR"
+export PSQ_DB_PASSWD="DB PASSWD"
+export PSQ_DB_NAME="DB NAME"
+export SCHRODINGER_ENV_HOME="schrodinger home"
+export SCHRODINGER_ENV_TMPDIR="schrodinger scratch"
+```

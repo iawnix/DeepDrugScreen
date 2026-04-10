@@ -19,7 +19,6 @@ mdurl==0.1.2
 ndfes==3.0
 nest-asyncio==1.6.0
 numpy==2.4.4
-packaging @ file:///home/task_176104874243446/conda-bld/packaging_1761049080023/work
 pandas==3.0.2
 parso==0.8.6
 pexpect==4.9.0
