@@ -15,3 +15,6 @@ export PSQ_DB_NAME="DB NAME"
 export SCHRODINGER_ENV_HOME="schrodinger home"
 export SCHRODINGER_ENV_TMPDIR="schrodinger scratch"
 ```
+# Usage
+- DBShow
+    - ![DBShow](img/DBShow.svg)

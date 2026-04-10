@@ -72,7 +72,7 @@ class StatCard(Static):
 
 
 class DB_TUI(App):
-
+    TITLE="DBShow by XiaoHe"
     # key map
     BINDINGS = [
         Binding("ctrl+q", "quit", "Quit", show=True), 
