@@ -1,4 +1,4 @@
-# dds
+# DeepDrugScreen
     - author: iawnix
     - date: 2026-04-11
 # Install
