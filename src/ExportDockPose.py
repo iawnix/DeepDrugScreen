@@ -4,7 +4,7 @@ import argparse
 from argparse import Namespace
 
 from rich import print as rprint
-from typing import List
+from typing import List, Union
 
 import re
 from pathlib import Path
@@ -14,7 +14,6 @@ import glob
 from pathlib import Path
 src_path = Path(__file__).parent.resolve()
 sys.path.append(str(src_path))
-
 from cli.glide_module import GetGlidePose
 
 def Parm() -> Namespace:
@@ -41,20 +40,22 @@ def Parm() -> Namespace:
 
     return parser.parse_args()
 
-def main() -> None:
-
+def export_dock_pose(  InDir: Union[None, str]
+                     , InFile: Union[None, str]
+                     , InFiles: Union[None, str]
+                     , cpu: int
+                     , output: str
+                     , verbose: bool) -> None:
     fps: List[pathlib.PosixPath] = []
     rootpath: str = os.getcwd()
     maegztype: str = None
-    
-    myP = Parm()
 
-    if myP.InFile:
+    if InFile:
         # 补全路径
-        fps.append(Path(myP.InFile[0]).absolute())
+        fps.append(Path(InFile).absolute())
         maegztype = "f"
-    elif myP.InDir:
-        inroot: pathlib.PosixPath = Path(myP.InDir[0]).absolute()
+    elif InDir:
+        inroot: pathlib.PosixPath = Path(InDir).absolute()
         rootpath = inroot.as_posix()
 
         for i in os.listdir(inroot):
@@ -66,22 +67,22 @@ def main() -> None:
                     _fps: List[pathlib.PosixPath] = [Path(_f).absolute() for _f in glob.glob("{}/Sub-*/glideDock-*/glideDock-*.maegz".format(_var_path))]
                     fps.extend(_fps)
         maegztype = "d"
-    elif myP.InFiles:
-        inroot: pathlib.PosixPath = Path(myP.InFiles[0]).absolute()
+    elif InFiles:
+        inroot: pathlib.PosixPath = Path(InFiles).absolute()
         rootpath = inroot.as_posix()
 
         fps.extend([Path(_f).absolute() for _f in glob.glob("{}/*.maegz".format(inroot))])
         maegztype = "fs"
 
     # init savePath
-    savePath: pathlib.PosixPath = Path(myP.output[0]).absolute()
+    savePath: pathlib.PosixPath = Path(output).absolute()
 
     if not os.path.exists(savePath):
         os.mkdir(savePath)
     else:
         print("Error[iaw]:> `{}` already exists. Please specify a different directory.".format(savePath))
         sys.exit(-1)
-    if myP.verbose == True:
+    if verbose == True:
         rprint(rootpath, type(rootpath), len(rootpath))
         rprint(fps)
 
@@ -89,7 +90,21 @@ def main() -> None:
                   fps=fps
                   ,savepath=savePath
                   ,maegztype=maegztype)
-    myjob.multrun(num_cpu=myP.cpu[0])
+    myjob.multrun(num_cpu=cpu)
+
+
+
+def main() -> None:
+    
+    myP = Parm()
+    #print(myP.InDir, myP.InFile, myP.InFiles, myP.verbose)
+    export_dock_pose(
+          InDir=myP.InDir[0] if myP.InDir is not None else None             # 这个地方取巧了, 如果是没有传入参数, 则刚好是默认None, 如果是传入了参数, 因为有nargs = 1所以被包装成了list
+        , InFile=myP.InFile[0] if myP.InFile is not None else None
+        , InFiles=myP.InFiles[0] if myP.InFiles is not None else None
+        , cpu=myP.cpu[0]
+        , output = myP.output[0]
+        , verbose = myP.verbose)
 
 if __name__ == "__main__":
     main()
