@@ -13,7 +13,7 @@ sys.path.append(str(src_path))
 #print(str(src_path))
 from util.agent.module import chat, init_session
 from util.agent.keys import CLI_KEY
-from util.agent.cli import SLASH_COMPLETER, cli_exit, cli_new, cli_exec, cli_ExportDockPose
+from util.agent.cli import SLASH_COMPLETER, cli_exit, cli_new, cli_exec, cli_ExportDockPose, cli_ExportDockScore, cli_ExportSelectGlidePose
 from typing import List, Any, Tuple, Dict, Union
 
 import json
@@ -102,9 +102,78 @@ def response_ExportDockPose(input: str) -> str:
             response = "执行ExportDockPose失败! `InFile`, `InDir`, `InFiles`必须选择一个!"
     
     if response is not None:
-        for k in ["output", "cpu", "verbose"]:
+        for (k, v) in [("output", "GlideOutPose"), ("cpu", 1), ("verbose", False)]:
             if args_dict.get(k):
                 args_dict2[k] = args_dict[k]
+            else:
+                args_dict2[k] = v
+        response = cli_ExportDockPose(args_dict2)
+
+    return response
+
+def response_ExportDockScore(input: str) -> str:
+    response = None
+    args = input[len("/ExportDockScore "):]
+    # 生成参数字典
+    args_dict = trans_args_str_to_args_dict(args, warning = False)
+    args_dict2 = {}
+    
+    input_mode_count = 0
+    for i in args_dict.keys():
+        if i in ["InFile", "InDir", "InFiles"]:
+            input_mode_count += 1
+    
+    match input_mode_count:
+        case 3:
+            response = "执行ExportDockScore失败! `InFile`, `InDir`, `InFiles`只能选择一个!"
+        case 2:
+            response = "执行ExportDockScore失败! `InFile`, `InDir`, `InFiles`只能选择一个!"
+        case 1:
+            if args_dict.get("InFile"):
+                args_dict2["input_mode"] = "InFile"
+                args_dict2["input_path"] = args_dict["InFile"]
+            elif args_dict.get("InDir"):
+                args_dict2["input_mode"] = "InDir"
+                args_dict2["input_path"] = args_dict["InDir"]
+            elif args_dict.get("InFiles"):
+                args_dict2["input_mode"] = "InFiles"
+                args_dict2["input_path"] = args_dict["InFiles"]
+            else:
+                pass
+        case 0:
+            response = "执行ExportDockScore失败! `InFile`, `InDir`, `InFiles`必须选择一个!"
+    
+    if response is not None:
+        for (k, v) in [("output", "OutCsv"), ("cpu", 1), ("verbose", False)]:
+            if args_dict.get(k):
+                args_dict2[k] = args_dict[k]
+            else:
+                args_dict2[k] = v
+        response = cli_ExportDockPose(args_dict2)
+
+    return response
+
+def response_ExportSelectPose(input: str) -> str:
+    response = None
+    args = input[len("/ExportSelectPose "):]
+    # 生成参数字典
+    args_dict = trans_args_str_to_args_dict(args, warning = False)
+    args_dict2 = {}
+    
+    # 必须参数
+    for k in ["InFiles", "SelectID"]:
+        if args_dict.get(k):
+            args_dict2[k] = args_dict[k]
+        else:
+            response = "执行ExportDockScore失败! `InFile`, `InDir`, `InFiles`只能选择一个!"
+
+    if response is None:
+        # 非必须参数
+        for (k, v) in [("output", "SelectGlidePose.sdf"), ("cpu", 1), ("verbose", False)]:
+            if args_dict.get(k):
+                args_dict2[k] = args_dict[k]
+            else:
+                args_dict2[k] = v
         response = cli_ExportDockPose(args_dict2)
 
     return response
@@ -144,6 +213,10 @@ def main() -> None:
             response = result
         elif stripped_input.startswith("/ExportDockPose "):
             response = response_ExportDockPose(stripped_input)
+        elif stripped_input.startswith("/ExportDockScore "):
+            response = response_ExportDockScore(stripped_input)
+        elif stripped_input.startswith("/ExportSelectPose "):
+            pass
         else:
             #print("Debug[iaw]:> ", history)
             message = chat(history, url = MODEL_URL, api = MODEL_API_KEY, model = MODEL_NAME)
@@ -162,6 +235,10 @@ def main() -> None:
                         case "cli_ExportDockPose":
                             #print("Debug[iaw]:> {} {}".format(func_name, func_args))
                             response = cli_ExportDockPose(func_args)
+                        case "cli_ExportDockScore":
+                            response = cli_ExportDockScore(func_args)
+                        case "cli_ExportDockScore":
+                            response = cli_ExportSelectGlidePose(func_args)
                         case _:
                             response = "暂时没有工具{}".format(func_name)
 
@@ -169,7 +246,7 @@ def main() -> None:
 
         content = Panel(
             Markdown(response),
-            title="[bold green]AI 回复[/bold green]",
+            #title="[bold green]AI 回复[/bold green]",
             border_style="green",
             padding=(1, 2)
         )

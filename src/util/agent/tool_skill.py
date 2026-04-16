@@ -58,7 +58,7 @@ AI_TOOL = [
    {
         "type": "function",
         "function": {
-            "name": "cli_ExportGlideScore",
+            "name": "cli_ExportDockScore",
             "description": "从 Glide 对接日志中提取打分数据并导出为 CSV 格式。当用户需要提取对接分数、处理 log 文件、汇总打分结果时使用。",
             "parameters": {
                 "type": "object",
@@ -89,6 +89,42 @@ AI_TOOL = [
                     }
                 },
                 "required": ["input_mode", "input_path"]
+            }
+        }
+    }, 
+    {
+        "type": "function",
+        "function": {
+            "name": "cli_ExportSelectPose",
+            "description": "从包含多个 Glide pose 的 SDF 文件目录中，根据 CSV 文件中的 ID 字段筛选目标构象，并合并导出为一个 SDF 文件。当用户需要按 ID 过滤对接构象、从批量 SDF 中挑选指定 pose 时使用。",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "InFiles": {
+                        "type": "string",
+                        "description": "包含多个 SDF 文件的目录路径"
+                    },
+                    "SelectID": {
+                        "type": "string",
+                        "description": "CSV 文件路径，必须包含 ID 字段"
+                    },
+                    "cpu": {
+                        "type": "integer",
+                        "description": "并行 CPU 核数，默认 1",
+                        "default": 1
+                    },
+                    "output": {
+                        "type": "string",
+                        "description": "输出 SDF 文件路径，默认 SelectGlidePose.sdf",
+                        "default": "SelectGlidePose.sdf"
+                    },
+                    "verbose": {
+                        "type": "boolean",
+                        "description": "是否显示详细信息，默认 False",
+                        "default": False
+                    }
+                },
+                "required": ["InFiles", "SelectID"]            
             }
         }
     }

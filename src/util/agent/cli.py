@@ -28,7 +28,7 @@ def cli_exec(command: str) -> Tuple[int, str, str]:
 
     return result.returncode, result.stdout, result.stderr
 
-def cli_ExportDockPose(func_args: Dict):
+def cli_ExportDockPose(func_args: Dict) -> str:
     input_mode = func_args["input_mode"]            # InFile / InDir / InFiles
     input_path = func_args["input_path"]
     output = func_args.get("output", "GlideOutPose")
@@ -49,7 +49,7 @@ def cli_ExportDockPose(func_args: Dict):
 
     return out if code == 0 else "Error: {}".format(err)
 
-def cli_ExportDockScore(func_args: Dict):
+def cli_ExportDockScore(func_args: Dict) -> str:
     input_mode = func_args["input_mode"]            # InFile / InDir / InFiles
     input_path = func_args["input_path"]
     output = func_args.get("output", "GlideOutPose")
@@ -70,17 +70,37 @@ def cli_ExportDockScore(func_args: Dict):
 
     return out if code == 0 else "Error: {}".format(err)
 
+def cli_ExportSelectGlidePose(func_args: Dict[str, Any]) -> str:
+    InFiles = func_args["InFiles"]
+    SelectID = func_args["SelectID"]
+    cpu = func_args.get("cpu", 1)
+    output = func_args.get("output", "SelectGlidePose.sdf")
+    verbose = func_args.get("verbose", False)
 
+    command = "ExportSelectPose -InFiles {} -SelectID {} -cpu {} -output {}".format(
+        InFiles, 
+        SelectID, 
+        cpu,
+        output
+    )
+
+    if verbose:
+        command += " -verbose True"
+    
+    code, out, err = cli_exec(command)
+
+    return out if code == 0 else "Error: {}".format(err)
 
 # /快捷指令
 SLASH_COMPLETER = WordCompleter(
-    ["/exit", "/new", "/exec", "/ExportDockPose", "/ExportDockScore"],
+    ["/exit", "/new", "/exec", "/ExportDockPose", "/ExportDockScore", "/ExportSelectGlidePose"],
     meta_dict = {
         "/exit": "Exit DrguCLI",
         "/new": "New Session",
         "/exec": "Exec BASH CMD",
         "/ExportDockPose": "Export Glide Dock Result[Pose]", 
         "/ExportDockScore": "Export Glide Dock Result[Score]", 
+        "/ExportDockScore": "Export Glide Dock Result[Pose] based on your provided ID.csv", 
     },
     ignore_case=True,
     match_middle=False,
