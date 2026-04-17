@@ -5,5 +5,7 @@ src/util/rdkit_postgresql/__pycache__/
 src/util/__pycache__/
 src/util/squeue/__pycache__/
 src/__pycache__/
+src/util/agent/__pycache__/
+
 .env
 test.md

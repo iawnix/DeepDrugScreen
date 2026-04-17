@@ -26,9 +26,8 @@ MODEL_URL = os.getenv("MODEL_URL")
 MODEL_API_KEY = os.getenv("MODEL_API_KEY")
 MODEL_NAME = os.getenv("MODEL_NAME")
 
-
-
-
+DRUGCLI_SESSION = os.getenv("DRUGCLI_SESSION")
+os.makedirs(DRUGCLI_SESSION, exist_ok=True)
 
 def trans_args_str_to_args_dict(args: str, warning: bool = True) -> Union[None, Dict[str, Any]]:
     """
@@ -179,11 +178,57 @@ def response_ExportSelectPose(input: str) -> str:
     return response
 
 
+def handle_tool_call(message: Dict, history: List[Dict]) -> Tuple[Dict, List[Dict]]:
+
+    for tool_call in message["tool_calls"]:
+        func_name = tool_call["function"]["name"]
+        func_args = json.loads(tool_call["function"]["arguments"])
+        call_id = tool_call["id"]
+        match func_name:
+            case "cli_exec":
+                code, out, err = cli_exec(func_args["command"])
+                result = out if code == 0 else err
+                response = result
+                #print("Debug[iaw]:> {} {}".format(func_name, func_args))
+            case "cli_ExportDockPose":
+                #print("Debug[iaw]:> {} {}".format(func_name, func_args))
+                response = cli_ExportDockPose(func_args)
+            case "cli_ExportDockScore":
+                response = cli_ExportDockScore(func_args)
+            case "cli_ExportDockScore":
+                response = cli_ExportSelectGlidePose(func_args)
+            case _:
+                response = "暂时没有工具{}".format(func_name)
+        
+    # result -> model
+    history.append({
+            "role": "tool",
+            "content": str(response),
+            "tool_call_id": call_id,
+            "name": func_name
+        })
+
+    update_message = chat(history, url=MODEL_URL, api=MODEL_API_KEY, model=MODEL_NAME)
+
+    return update_message, history
+
+def get_model_response(history: List[Dict]
+                       , MODEL_URL: str, MODEL_API_KEY: str, MODEL_NAME: str) -> Tuple[Dict, List[Dict]]:
+    #print("Debug[iaw]:> ", history)
+    message = chat(history, url = MODEL_URL, api = MODEL_API_KEY, model = MODEL_NAME)
+    if message.get("tool_calls"):
+        # 这里是完整的模型回复
+        response, history = handle_tool_call(message, history)
+    else:
+        response = message
+
+    return response, history
+
 def main() -> None:
     
     # 初始化控制台
     console = Console()
-    session, history = init_session(console)
+    session, history, session_id = init_session(console)
     
     while True:
 
@@ -218,29 +263,13 @@ def main() -> None:
         elif stripped_input.startswith("/ExportSelectPose "):
             pass
         else:
-            #print("Debug[iaw]:> ", history)
-            message = chat(history, url = MODEL_URL, api = MODEL_API_KEY, model = MODEL_NAME)
-            if not message.get("tool_calls"):
-                response = message["content"]
+            full_response, history = get_model_response(history, MODEL_URL, MODEL_API_KEY, MODEL_NAME)
+            
+            # 暂未实现, 这里正常需要做一个while循环, 或者设置一个次数, 超过之后就请求继续
+            if full_response.get("tool_calls"):
+                pass
             else:
-                for tool_call in message["tool_calls"]:
-                    func_name = tool_call["function"]["name"]
-                    func_args = json.loads(tool_call["function"]["arguments"])
-                    match func_name:
-                        case "cli_exec":
-                            code, out, err = cli_exec(func_args["command"])
-                            result = out if code == 0 else err
-                            response = result
-                            #print("Debug[iaw]:> {} {}".format(func_name, func_args))
-                        case "cli_ExportDockPose":
-                            #print("Debug[iaw]:> {} {}".format(func_name, func_args))
-                            response = cli_ExportDockPose(func_args)
-                        case "cli_ExportDockScore":
-                            response = cli_ExportDockScore(func_args)
-                        case "cli_ExportDockScore":
-                            response = cli_ExportSelectGlidePose(func_args)
-                        case _:
-                            response = "暂时没有工具{}".format(func_name)
+                response = full_response["content"]
 
         history.append({"role": "assistant", "content": response})
 

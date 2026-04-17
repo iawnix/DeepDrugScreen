@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple, Any
+from typing import Dict, List, Tuple, Any, Union
 import requests
 
 import sys
@@ -6,9 +6,11 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent
 sys.path.append(str(project_root))
 
-from src.util.agent.tool_skill import AI_TOOL
+from util.agent.tool_skill import AI_TOOL
 
 from prompt_toolkit import PromptSession
+
+import uuid
 
 def chat(messages: Dict[str, str], url: str, api: str, model: str, stream: bool = False) -> str:
 
@@ -28,10 +30,27 @@ def chat(messages: Dict[str, str], url: str, api: str, model: str, stream: bool 
 
     return response.json()["choices"][0]["message"]
 
-def init_session(console)-> Tuple[PromptSession, List]:
-    history = []
-    console.clear()
-    console.print("[bold magenta]=== DrugCLI ===", justify="center")
-    history.append({"role": "system", "content": "你是迪迦"})
+def init_session(console, old_session_json: Union[str, None] = None)-> Tuple[PromptSession, List[Dict], str]:
 
-    return PromptSession(), history
+    console.clear()
+    if old_session_json == None:
+        session_id = str(uuid.uuid4())
+    else:
+        session_id = os.path.splitext(os.path.basename(old_session_json))[0]
+
+    console.print("[bold magenta]=== DrugCLI ===", justify="center")
+    if old_session_json == None:
+        history = []
+        history.append({"role": "system", "content": "你是迪迦"})
+    else:
+        with open(old_session_json, "r", encoding="utf-8") as f:
+            history = json.load(f)
+
+    return PromptSession(), history, session_id
+
+def save_session(session_id: str, history: List[Dict], DRUGCLI_SESSION: str) -> None:
+    save_fp = os.path.join(DRUGCLI_SESSION, session_id + ".json")
+    with open(save_fp, "w", encoding="utf-8") as f:
+        json.dump(history, f, ensure_ascii=False, indent=2)
+
+
