@@ -28,7 +28,7 @@ def Parm() -> Namespace:
     """
 
     parser = argparse.ArgumentParser(description=
-                                     "The author is very lazy and doesn't want to write anything\n"
+                                     "Export ligand poses from Glide docking results to SDF. For extracting docking conformations and ligand poses from maegz files.\n"
                                      "Author: Xiao He [ECNU]")
 
     parser.add_argument("-InDir",type=str, nargs=1, default = None,help="DirPath: SbatchDock does not generate a unified output directory. Please move all result directories into a single folder.")

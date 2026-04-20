@@ -15,7 +15,7 @@ from cli.base import CMD_RUN
 
 def Parm() -> Namespace:
     parser = argparse.ArgumentParser(description=
-                                     "The author is very lazy and doesn't want to write anything\n"
+                                     "An automated tool for batch submitting molecular docking tasks to the Slurm job scheduler. It parses configuration files, creates independent directories for each ligand library, generates Slurm job scripts and Docker configuration files, and automatically submits computing tasks to the queue.\n"
                                      "Author: Xiao He [ECNU]")
     parser.add_argument("-config",type=str, nargs=1, help="FilePath: config.json, you must ensure that all paths only contain the name of the last layer and no other symbols!")
     parser.add_argument("-docker",type=str, nargs=1, help="Docker: Glide or Qvina.")

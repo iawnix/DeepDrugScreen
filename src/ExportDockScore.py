@@ -29,7 +29,7 @@ def Parm() -> Namespace:
     """
 
     parser = argparse.ArgumentParser(description=
-                                     "The author is very lazy and doesn't want to write anything\n"
+                                     "Extract scoring data from Glide docking logs and export to CSV. For extracting docking scores and aggregating log results.\n"
                                      "Author: IAW [HENU]"
                                     )
     parser.add_argument("-InDir",type=str, nargs=1, default = None,help="DirPath: ./")

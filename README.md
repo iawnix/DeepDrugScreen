@@ -14,11 +14,14 @@ export PSQ_DB_PASSWD="DB PASSWD"
 export PSQ_DB_NAME="DB NAME"
 export SCHRODINGER_ENV_HOME="schrodinger home"
 export SCHRODINGER_ENV_TMPDIR="schrodinger scratch"
-MODEL_URL="YOUR_MODEL_URL"
-MODEL_API_KEY="YOUR_MODEL_API_KEY"
-MODEL_NAME="YOUR_MODEL_NAME"
+export MODEL_URL="YOUR_MODEL_URL"
+export MODEL_API_KEY="YOUR_MODEL_API_KEY"
+export MODEL_NAME="YOUR_MODEL_NAME"
+export DRUGCLI_SESSION="SAVE_SESSION_MEMORY"
 
 ```
 # Usage
 - DBShow
-    - ![DBShow](img/DBShow.svg)
+    - ![DBShow](img/DBShow_main.png)
+- DrugCLI
+    - ![DrugCLI](img/DrugCLI_main.png)

@@ -116,7 +116,7 @@ SLASH_COMPLETER = WordCompleter(
         "/exec": "Exec BASH CMD",
         "/ExportDockPose": "Export Glide Dock Result[Pose]", 
         "/ExportDockScore": "Export Glide Dock Result[Score]", 
-        "/ExportDockScore": "Export Glide Dock Result[Pose] based on your provided ID.csv", 
+        "/ExportSelectGlidePose": "Export Glide Dock Result[Pose] based on your provided ID.csv", 
         "/SbatchDock": "Submit Docking Jobs"
     },
     ignore_case=True,
