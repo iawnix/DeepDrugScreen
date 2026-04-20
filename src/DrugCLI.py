@@ -14,7 +14,7 @@ sys.path.append(str(src_path))
 #print(str(src_path))
 from util.agent.module import chat, init_session
 from util.agent.keys import CLI_KEY
-from util.agent.cli import SLASH_COMPLETER, cli_exit, cli_new, cli_exec, cli_ExportDockPose, cli_ExportDockScore, cli_ExportSelectGlidePose
+from util.agent.cli import SLASH_COMPLETER, cli_exit, cli_new, cli_exec, cli_SbatchDock, cli_ExportDockPose, cli_ExportDockScore, cli_ExportSelectGlidePose
 from typing import List, Any, Tuple, Dict, Union
 
 import json
@@ -166,7 +166,7 @@ def response_ExportSelectPose(input: str) -> str:
         if args_dict.get(k):
             args_dict2[k] = args_dict[k]
         else:
-            response = "执行ExportDockScore失败! `InFile`, `InDir`, `InFiles`只能选择一个!"
+            response = "执行ExportDockScore失败! `{}` 必须存在!".format(k)
 
     if response is None:
         # 非必须参数
@@ -179,6 +179,27 @@ def response_ExportSelectPose(input: str) -> str:
 
     return response
 
+
+def response_SbatchDock() -> str:
+    response = None
+    args = input[len("/SbatchDock "):]
+    # 生成参数字典
+    args_dict = trans_args_str_to_args_dict(args, warning = False)
+    args_dict2 = {}
+    
+    # 必须参数
+    for k in ["config", "docker"]:
+        if args_dict.get(k):
+            args_dict2[k] = args_dict[k]
+        else:
+            response = "执行SbatchDock失败! `{}`必须存在!".format(k)
+
+    if response is None:
+        # 无非必须参数
+        response = cli_SbatchDock(args_dict2)
+
+    return response
+ 
 
 def handle_tool_call(message: Dict, history: List[Dict]) -> Tuple[Dict, List[Dict]]:
 

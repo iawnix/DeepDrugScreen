@@ -127,5 +127,27 @@ AI_TOOL = [
                 "required": ["InFiles", "SelectID"]            
             }
         }
+    }, 
+    {
+        "type": "function",
+        "function": {
+            "name": "cli_SbatchDock",
+            "description": "自动化批量提交分子对接任务到 Slurm 队列。该工具会解析配置文件，为每个配体库创建独立目录，生成 Slurm 脚本及 Docker 配置，并自动执行任务提交。",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "config": {
+                        "type": "string",
+                        "description": "JSON 配置文件路径。该文件应包含 nNODE, nCPU, Pydocker, LIG_CSV (配体目录), grid, splitStep 等必要参数。"
+                    },
+                    "docker": {
+                        "type": "string",
+                        "enum": ["Glide", "Qvina"],
+                        "description": "使用的对接引擎或 Docker 环境类型。目前主要支持 'Glide'，也可扩展支持 'Qvina'。"
+                    }
+                },
+                "required": ["config", "docker"]
+            }
+        }
     }
 ]

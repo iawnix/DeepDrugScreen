@@ -94,9 +94,22 @@ def cli_ExportSelectGlidePose(func_args: Dict[str, Any]) -> str:
 
     return out if code == 0 else "Error: {}".format(err)
 
+def cli_SbatchDock(func_args: Dict[str, Any]) -> str:
+    config = func_args["config"]
+    docker = func_args["docker"]
+
+    command = "SbatchDock -config {} -docker {}".format(
+        config, 
+        docker
+    )
+    code, out, err = cli_exec(command)
+
+    return out if code == 0 else "Error: {}".format(err)
+
+
 # /快捷指令
 SLASH_COMPLETER = WordCompleter(
-    ["/exit", "/new", "/exec", "/ExportDockPose", "/ExportDockScore", "/ExportSelectGlidePose"],
+    ["/exit", "/new", "/exec", "/ExportDockPose", "/ExportDockScore", "/ExportSelectGlidePose", "/SbatchDock"],
     meta_dict = {
         "/exit": "Exit DrguCLI",
         "/new": "New Session",
@@ -104,6 +117,7 @@ SLASH_COMPLETER = WordCompleter(
         "/ExportDockPose": "Export Glide Dock Result[Pose]", 
         "/ExportDockScore": "Export Glide Dock Result[Score]", 
         "/ExportDockScore": "Export Glide Dock Result[Pose] based on your provided ID.csv", 
+        "/SbatchDock": "Submit Docking Jobs"
     },
     ignore_case=True,
     match_middle=False,
