@@ -47,3 +47,5 @@ typing_extensions==4.15.0
 uc-micro-py==2.0.0
 wcwidth==0.6.0
 wheel==0.46.3
+questionary==2.1.1
+

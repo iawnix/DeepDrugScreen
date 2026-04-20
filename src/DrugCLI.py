@@ -12,9 +12,17 @@ from pathlib import Path
 src_path = Path(__file__).parent.resolve()
 sys.path.append(str(src_path))
 #print(str(src_path))
-from util.agent.module import chat, init_session
+from util.agent.module import chat, init_session, save_session
 from util.agent.keys import CLI_KEY
-from util.agent.cli import SLASH_COMPLETER, cli_exit, cli_new, cli_exec, cli_SbatchDock, cli_ExportDockPose, cli_ExportDockScore, cli_ExportSelectGlidePose
+from util.agent.cli import (SLASH_COMPLETER
+                            , cli_exit
+                            , cli_new
+                            , cli_exec
+                            , cli_SbatchDock
+                            , cli_ExportDockPose
+                            , cli_ExportDockScore
+                            , cli_ExportSelectGlidePose
+                            , cli_session)
 from typing import List, Any, Tuple, Dict, Union
 
 import json
@@ -144,7 +152,7 @@ def response_ExportDockScore(input: str) -> str:
         case 0:
             response = "执行ExportDockScore失败! `InFile`, `InDir`, `InFiles`必须选择一个!"
     
-    if response is not None:
+    if response is None:
         for (k, v) in [("output", "OutCsv"), ("cpu", 1), ("verbose", False)]:
             if args_dict.get(k):
                 args_dict2[k] = args_dict[k]
@@ -178,7 +186,6 @@ def response_ExportSelectPose(input: str) -> str:
         response = cli_ExportDockPose(args_dict2)
 
     return response
-
 
 def response_SbatchDock() -> str:
     response = None
@@ -284,7 +291,17 @@ def main() -> None:
         elif stripped_input.startswith("/ExportDockScore "):
             response = response_ExportDockScore(stripped_input)
         elif stripped_input.startswith("/ExportSelectPose "):
-            pass
+            response = response_ExportSelectPose(stripped_input)
+        elif stripped_input.startswith("/SbatchDock "):
+            response = response_SbatchDock(stripped_input)
+        elif stripped_input.startswith("/session"):
+            select_session_id = cli_session(now_session_id = session_id, session_path = DRUGCLI_SESSION)
+            if select_session_id != session_id:
+                # load session
+                save_session(session_id = session_id, history = history, DRUGCLI_SESSION = DRUGCLI_SESSION)
+                session, history, session_id = init_session(console = console
+                                                            , old_session_json = os.path.join(DRUGCLI_SESSION, select_session_id + ".json"))
+            continue
         else:
             with Status("Running...", spinner = "pong") as status:
                 full_response, history = get_model_response(history, MODEL_URL, MODEL_API_KEY, MODEL_NAME)

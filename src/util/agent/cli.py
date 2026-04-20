@@ -2,12 +2,17 @@ from typing import Dict, List, Tuple, Any
 
 import sys
 from pathlib import Path
+
+from numpy.f2py.auxfuncs import show
 project_root = Path(__file__).parent.parent.parent
 sys.path.append(str(project_root))
 from util.agent.module import init_session, save_session
 import subprocess
 
+from glob import glob
 from prompt_toolkit.completion import WordCompleter
+import os
+import questionary
 
 def cli_exit(console) -> None:
     console.print("[bold red]Exit[/bold red]")
@@ -20,6 +25,29 @@ def cli_new(console, history: List[Dict], session_id: str, DRUGCLI_SESSION: str)
     new_session, new_history, new_session_id = init_session(console)
 
     return new_session, new_history, new_session_id
+
+def cli_session(now_session_id: str, session_path: str) -> str:
+    all_session_id = [os.path.splitext(os.path.basename(i_fp))[0] for i_fp in glob("{}/*.json".format(session_path))]
+    if now_session_id not in all_session_id:
+        all_session_id.append(now_session_id)
+    
+    # show
+    choices = [ questionary.Choice(title=[("class:text", s_id)
+                                          , ("class:annotation"
+                                          , " (current)" if s_id == now_session_id else "")], value=s_id ) for s_id in all_session_id]
+    
+    selected_id = questionary.select(
+            "Please select a session to switch to:",
+            choices=choices,
+            default=now_session_id,
+            style=questionary.Style([
+                ('annotation', 'italic fg:cyan'),
+                ('selected', 'bold fg:green'),
+            ])
+        ).ask()
+    print("here")
+    return selected_id
+
 
 def cli_exec(command: str) -> Tuple[int, str, str]:
     result = subprocess.run(
@@ -109,10 +137,11 @@ def cli_SbatchDock(func_args: Dict[str, Any]) -> str:
 
 # /快捷指令
 SLASH_COMPLETER = WordCompleter(
-    ["/exit", "/new", "/exec", "/ExportDockPose", "/ExportDockScore", "/ExportSelectGlidePose", "/SbatchDock"],
+    ["/exit", "/session", "/new", "/exec", "/ExportDockPose", "/ExportDockScore", "/ExportSelectGlidePose", "/SbatchDock"],
     meta_dict = {
         "/exit": "Exit DrguCLI",
         "/new": "New Session",
+        "/session": "Select Session",
         "/exec": "Exec BASH CMD",
         "/ExportDockPose": "Export Glide Dock Result[Pose]", 
         "/ExportDockScore": "Export Glide Dock Result[Score]", 
