@@ -1,6 +1,7 @@
 from typing import Dict, List, Tuple, Any, Union
 import requests
 
+import os
 import sys
 from pathlib import Path
 project_root = Path(__file__).parent.parent.parent
@@ -11,6 +12,7 @@ from util.agent.tool_skill import AI_TOOL
 from prompt_toolkit import PromptSession
 
 import uuid
+import json
 
 def chat(messages: Dict[str, str], url: str, api: str, model: str, stream: bool = False) -> str:
 
@@ -50,7 +52,8 @@ def init_session(console, old_session_json: Union[str, None] = None)-> Tuple[Pro
 
 def save_session(session_id: str, history: List[Dict], DRUGCLI_SESSION: str) -> None:
     save_fp = os.path.join(DRUGCLI_SESSION, session_id + ".json")
-    with open(save_fp, "w", encoding="utf-8") as f:
+    #print(save_fp)
+    with open(save_fp, "w+", encoding="utf-8") as f:
         json.dump(history, f, ensure_ascii=False, indent=2)
 
 

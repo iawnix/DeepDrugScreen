@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 project_root = Path(__file__).parent.parent.parent
 sys.path.append(str(project_root))
-from util.agent.module import init_session
+from util.agent.module import init_session, save_session
 import subprocess
 
 from prompt_toolkit.completion import WordCompleter
@@ -12,11 +12,14 @@ from prompt_toolkit.completion import WordCompleter
 def cli_exit(console) -> None:
     console.print("[bold red]Exit[/bold red]")
 
-def cli_new(console) -> Tuple[Any, List]:
-    session, history = init_session(console)
+def cli_new(console, history: List[Dict], session_id: str, DRUGCLI_SESSION: str) -> Tuple[Any, List]:
 
     # 储存历史会话
-    return session, history
+    save_session(session_id, history, DRUGCLI_SESSION)
+
+    new_session, new_history, new_session_id = init_session(console)
+
+    return new_session, new_history, new_session_id
 
 def cli_exec(command: str) -> Tuple[int, str, str]:
     result = subprocess.run(

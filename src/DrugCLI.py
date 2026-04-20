@@ -4,6 +4,7 @@ from prompt_toolkit import prompt, PromptSession
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
+from rich.status import Status
 
 import sys
 import os
@@ -18,6 +19,7 @@ from typing import List, Any, Tuple, Dict, Union
 
 import json
 import shlex
+
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -249,7 +251,7 @@ def main() -> None:
             cli_exit(console)
             break
         elif stripped_input == "/new":
-            cli_new(console)
+            session, history, session_id = cli_new(console, history, session_id, DRUGCLI_SESSION)
             continue
         elif stripped_input.startswith("/exec "):
             command = stripped_input[len("/exec "):]
@@ -263,13 +265,14 @@ def main() -> None:
         elif stripped_input.startswith("/ExportSelectPose "):
             pass
         else:
-            full_response, history = get_model_response(history, MODEL_URL, MODEL_API_KEY, MODEL_NAME)
+            with Status("Running...", spinner = "pong") as status:
+                full_response, history = get_model_response(history, MODEL_URL, MODEL_API_KEY, MODEL_NAME)
             
-            # 暂未实现, 这里正常需要做一个while循环, 或者设置一个次数, 超过之后就请求继续
-            if full_response.get("tool_calls"):
-                pass
-            else:
-                response = full_response["content"]
+                # 暂未实现, 这里正常需要做一个while循环, 或者设置一个次数, 超过之后就请求继续
+                if full_response.get("tool_calls"):
+                    pass
+                else:
+                    response = full_response["content"]
 
         history.append({"role": "assistant", "content": response})
 
