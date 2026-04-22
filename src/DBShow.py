@@ -261,10 +261,10 @@ class DB_TUI(App):
                         conditions[prop] = (vmin, vmax)
                     except ValueError:
                         self.notify("Error[iaw]:> Invalid format for {}. Use 'min,max' (e.g. 200,500)".format(prop.upper()), severity="error")
-                        return
+                        return None
             if not conditions:
                 self.notify("Error[iaw]:> At least one property condition is required!", severity="error")
-                return
+                return None
             params["conditions"] = conditions
 
         self.run_export_task(mode_id, params, filename)
