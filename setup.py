@@ -23,6 +23,7 @@ setup(
               , "ExportDockScore=src.ExportDockScore:main"
               , "ExportSelectPose=src.ExportSelectPose:main"
               , "DrugCLI=src.DrugCLI:main"
+              , "GlideDock=src.GlideDock:main"
               , "SbatchDock=src.SbatchDock:main"]}
     , python_requires=">=3.12"
 )

@@ -1,0 +1,12 @@
+{
+      "Pydocker":"which GlideDock"
+    , "LIG_CSV":"PATH_TO_LIGAND_CSV_PATH"
+    , "nNODE":1
+    , "nCPU": 28
+    , "grid": "THE GLIDE BOX GIRD PATH"
+    , "splitStep": 10000
+    , "pH": 7.0
+    , "numStere": 1
+    , "precision": "SP"
+}
+

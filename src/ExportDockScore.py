@@ -30,7 +30,7 @@ def Parm() -> Namespace:
 
     parser = argparse.ArgumentParser(description=
                                      "Extract scoring data from Glide docking logs and export to CSV. For extracting docking scores and aggregating log results.\n"
-                                     "Author: IAW [HENU]"
+                                     "Author: Xiao He [ECNU]"
                                     )
     parser.add_argument("-InDir",type=str, nargs=1, default = None,help="DirPath: ./")
     parser.add_argument("-InFile",type=str, nargs=1, default = None,help="FilePath: config.json")
