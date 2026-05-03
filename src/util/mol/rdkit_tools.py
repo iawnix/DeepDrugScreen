@@ -5,18 +5,18 @@ from rdkit.Chem.rdchem import Mol
 from rdkit.DataStructs.cDataStructs import ExplicitBitVect
 from rdkit.ML.Descriptors import MoleculeDescriptors
 
-def load_mol(mol_f_type: str, mol_f: str, removeHs: bool = False, santize: bool = True) -> Mol:
+def load_mol(mol_f_type: str, mol_f: str, removeHs: bool = False, sanitize: bool = True) -> Mol:
     match mol_f_type:
         case "smi":
-            mol = Chem.MolFromSmiles(mol_f, santize = santize, removeHs = removeHs)
+            mol = Chem.MolFromSmiles(mol_f, sanitize = sanitize, removeHs = removeHs)
         case "mol":
-            mol = Chem.MolFromMolFile(mol_f, santize = santize, removeHs = removeHs)
+            mol = Chem.MolFromMolFile(mol_f, sanitize = sanitize, removeHs = removeHs)
         case "mol2":
-            mol = Chem.MolFromMol2File(mol_f, santize = santize, removeHs = removeHs)
+            mol = Chem.MolFromMol2File(mol_f, sanitize = sanitize, removeHs = removeHs)
         case "sdf":
-            mol = Chem.SDMolSupplier(mol_f, santize = santize, removeHs = removeHs)[0]
+            mol = Chem.SDMolSupplier(mol_f, sanitize = sanitize, removeHs = removeHs)[0]
         case "pdb":
-            mol = Chem.MolFromPDBFile(mol_f, santize = santize, removeHs = removeHs)
+            mol = Chem.MolFromPDBFile(mol_f, sanitize = sanitize, removeHs = removeHs)
         case _:
             print("Error[iaw]:> UNsupport molecular type!")
             mol = None
